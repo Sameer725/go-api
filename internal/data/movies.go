@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/lib/pq"
@@ -39,6 +40,49 @@ func ValidateMovie(v *validator.Validator, movie *Movie) {
 
 type MovieModel struct {
 	DB *sql.DB
+}
+
+func (model MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, MetaData, error) {
+	//the count(*) OVER() is used for filtered record count
+	query := fmt.Sprintf(`
+	SELECT count(*) OVER(), id,created_at,title,year,runtime,genres,version
+	FROM movies WHERE (to_tsvector('simple',title) @@ plainto_tsquery('simple', $1) OR $1='') 
+	AND (genres @> $2 OR $2='{}')
+	ORDER BY %s %s, id ASC
+	LIMIT $3 OFFSET $4
+	`, filters.SortColumn(), filters.SortDirection())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{title, pq.Array(genres), filters.limit(), filters.offset()}
+
+	rows, err := model.DB.QueryContext(ctx, query, args...)
+
+	if err != nil {
+		return nil, MetaData{}, err
+	}
+
+	defer rows.Close()
+
+	totalRecords := 0
+	movies := []*Movie{}
+
+	for rows.Next() {
+		var movie Movie
+
+		err := rows.Scan(&totalRecords, &movie.ID, &movie.CreatedAt, &movie.Title, &movie.Year, &movie.Runtime, pq.Array(&movie.Genres), &movie.Version)
+
+		if err != nil {
+			return nil, MetaData{}, err
+		}
+
+		movies = append(movies, &movie)
+	}
+
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return movies, metadata, nil
 }
 
 func (model MovieModel) Insert(movie *Movie) error {
