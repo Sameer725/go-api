@@ -109,6 +109,17 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// round-trip locking: to help ensure client is not working with outdated information
+	//client can send If-Not-Match or X-Expected-Version header
+	//
+
+	// if r.Header.Get("X-Expected-Version") != "" {
+	// 	if strconv.FormatInt(int64(movie.Version), 32) != r.Header.Get("X-Expected-Version") {
+	// 		app.editConflictResponse(w, r)
+	// 		return
+	// 	}
+	// }
+
 	//falsy value for pointer is nil so change every attr to pointer
 	var input struct {
 		Title   *string       `json:"title"`
