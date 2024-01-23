@@ -151,7 +151,13 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 
 // helper to run background functions
 func (app *application) background(fn func()) {
+	//increment waitGroup counter for each background goroutine
+	app.wg.Add(1)
+
 	go func() {
+		//decrement counter before background routines return
+		defer app.wg.Done()
+
 		defer func() {
 
 			if err := recover(); err != nil {

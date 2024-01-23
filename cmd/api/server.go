@@ -42,7 +42,18 @@ func (app *application) server() error {
 
 		//returns nil if graceful shutdown is success
 		// error if problem closing listeners
-		shutDownError <- srv.Shutdown(ctx)
+		err := srv.Shutdown(ctx)
+
+		if err != nil {
+			shutDownError <- err
+		}
+
+		app.logger.Info("completing background task", "addr", srv.Addr)
+
+		//wait till our WaitGroup is zero -> block until all background routine finished
+		//return nil in shutdown error do indicate that shutdown completed
+		app.wg.Wait()
+		shutDownError <- nil
 
 		// exit tha app with success status code
 		os.Exit(0)
