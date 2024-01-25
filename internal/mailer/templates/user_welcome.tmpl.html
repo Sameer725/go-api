@@ -7,6 +7,11 @@ Thanks for signing up for a GreenLight account. We're excited to have you onboar
 
 For Future Reference, your user ID number is {{.ID}}
 
+Please send a request to the `PUT /v1/users/activated` endpoint with the following JSON body to activate you account:
+{"token": "{{.activationToken}}}"
+
+Please note that this is a one-time use token and it will expire in 3 days.
+
 Thanks,
 
 The GreenLight Team
@@ -23,7 +28,15 @@ The GreenLight Team
 <body>
     <p>Hi,</p>
     <p>Thanks for signing up for a GreenLight account. We're excited to have you on board!</p>
-    <p>For future reference, your user ID number is {{.ID}}.</p>
+    <p>For future reference, your user ID number is {{.userID}}.</p>
+    <p>Please send a request to the `PUT /v1/users/activated` endpoint with the following JSON body to activate you
+        account:</p>
+    <pre>
+        <code>
+            {"token": "{{.activationToken}}}"
+        </code>
+    </pre>
+    <p>Please note that this is a one-time use token and it will expire in 3 days.</p>
     <p>Thanks,</p>
     <p>The GreenLight Team</p>
 </body>
