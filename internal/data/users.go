@@ -30,6 +30,12 @@ type User struct {
 	Version   int       `json:"-"`
 }
 
+var AnonymousUser = &User{}
+
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
+}
+
 // calculate bcrypt
 func (p *password) Set(plaintext string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(plaintext), 12)
