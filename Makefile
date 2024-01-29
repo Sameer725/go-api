@@ -45,10 +45,7 @@ db/migration/new:
 # =============================================== #
 
 .PHONY: audit
-audit:
-	@echo 'Tidying and verifying module dependencies'
-	go mod tidy
-	go mod verify
+audit: vendor
 	@echo 'Formatting code...'
 	go fmt ./...
 	@echo 'Vetting code...'
@@ -56,3 +53,14 @@ audit:
 	staticcheck ./...
 	@echo 'Running tests'
 	go test -race -vet=off ./...
+
+#go module proxy/mirror: hosted by google which host copy of all the 3rd party package
+#vendor: tidy and vendor module
+#go mod vendor: stores complete copy of source code of 3rd party packages in a vendor folder
+.PHONY: vendor
+vendor:
+	@echo 'Tidying and verifying module dependencies..'
+	go mod tidy
+	go mod verify
+	@echo 'Vendoring dependencies..'
+	go mod vendor
