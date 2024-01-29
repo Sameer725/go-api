@@ -16,9 +16,10 @@ import (
 	_ "github.com/lib/pq"
 	"movies.samkha.net/internal/data"
 	"movies.samkha.net/internal/mailer"
+	"movies.samkha.net/internal/vcs"
 )
 
-const version = "1.0.0"
+var version = vcs.Version()
 
 type config struct {
 	port int
