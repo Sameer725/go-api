@@ -4,13 +4,13 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
-	"net"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/tomasen/realip"
 	"golang.org/x/time/rate"
 	"movies.samkha.net/internal/data"
 	"movies.samkha.net/internal/validator"
@@ -65,12 +65,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 			return
 		}
 
-		ip, _, err := net.SplitHostPort(r.RemoteAddr)
-
-		if err != nil {
-			app.serverErrorResponse(w, r, err)
-			return
-		}
+		ip := realip.FromRequest(r)
 
 		//lock the mutex to prevent a concurrent execution
 		mu.Lock()

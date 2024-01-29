@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"expvar"
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"runtime"
@@ -113,8 +114,16 @@ func main() {
 		cfg.cors.trustedOrigins = strings.Fields(val)
 		return nil
 	})
+	//create new version boolean flag with default to false
+	displayVersion := flag.Bool("version", false, "Display version and exit")
 
 	flag.Parse()
+
+	//if the version flag value is true, then print version number and immediately exit.
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		os.Exit(0)
+	}
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	db, err := openDB(cfg)

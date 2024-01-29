@@ -1,4 +1,4 @@
-include .env
+include .envrc
 
 # =============================================== #
 # HELPERS
@@ -64,3 +64,18 @@ vendor:
 	go mod verify
 	@echo 'Vendoring dependencies..'
 	go mod vendor
+
+# =============================================== #
+# BUILD
+# =============================================== #
+#GOOS and GOARCH is used to target build to specific os and architecture
+#go tool dist list # lists all os and arch supported by go
+.PHONY: build/api/for
+build/api/for:
+	@echo "Building cmd/api..."
+	GOOS=${name} GOARCH=${arch} go build -o=./bin/${name}_${arch}/api ./cmd/api
+
+.PHONY: build/api
+build/api:
+	@echo "Building cmd/api..."
+	go build -o=./bin/api ./cmd/api
